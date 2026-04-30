@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winflex Costos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #FAFAF7;
+    --surface: #FFFFFF;
+    --border: #E8E6DF;
+    --text: #1F1F1D;
+    --text-muted: #6F6E68;
+    --text-soft: #9F9D95;
+    --accent: #1F3A5F;
+    --accent-soft: #E8EDF4;
+    --success: #1D7A52;
+    --success-soft: #E1F5EE;
+    --warning: #B8651A;
+    --warning-soft: #FAEEDA;
+    --danger: #A32D2D;
+    --danger-soft: #FCEBEB;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .num { font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; }
+  
+  /* Login */
+  .login-screen {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+  }
+  .login-box h1 { font-size: 22px; font-weight: 600; margin-bottom: 4px; color: var(--accent); }
+  .login-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 24px; }
+  .pin-input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: 8px;
+    margin-bottom: 12px;
+    background: var(--bg);
+  }
+  .pin-input:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .login-error { color: var(--danger); font-size: 12px; margin-top: 8px; min-height: 16px; }
+  
+  /* Main app */
+  .app { display: none; }
+  .app.active { display: block; }
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .logo { font-size: 16px; font-weight: 600; color: var(--accent); }
+  .logo span { color: var(--text-muted); font-weight: 400; margin-left: 8px; font-size: 13px; }
+  .user-pill {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .user-pill button {
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    margin-left: 8px; font-size: 12px;
+  }
+  .user-pill button:hover { color: var(--danger); }
+  
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .tab:hover:not(.active) { color: var(--text); }
+  
+  .pane { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
+  .pane.active { display: block; }
+  
+  /* Cards & layout */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  
+  .grid-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .stat-value { font-size: 22px; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; }
+  .stat-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .stat.success .stat-value { color: var(--success); }
+  .stat.warning .stat-value { color: var(--warning); }
+  .stat.danger .stat-value { color: var(--danger); }
+  .stat.accent .stat-value { color: var(--accent); }
+  
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { 
+    text-align: left; 
+    padding: 10px 8px; 
+    font-weight: 500; 
+    color: var(--text-muted); 
+    border-bottom: 1px solid var(--border); 
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: rgba(0,0,0,0.02); }
+  .num-col { text-align: right; font-family: 'DM Mono', monospace; }
+  
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .pill-pe { background: var(--accent-soft); color: var(--accent); }
+  .pill-pet { background: #F1EAFE; color: #5C2C8E; }
+  .pill-recic { background: #E8F5E1; color: #2C6011; }
+  .pill-amcor { background: #FAEEDA; color: #854F0B; }
+  .pill-other { background: var(--bg); color: var(--text-muted); }
+  .pill-success { background: var(--success-soft); color: var(--success); }
+  .pill-warning { background: var(--warning-soft); color: var(--warning); }
+  .pill-danger { background: var(--danger-soft); color: var(--danger); }
+  
+  /* Inputs and buttons */
+  input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  input[type="number"] { font-family: 'DM Mono', monospace; }
+  
+  button.btn {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.1s;
+  }
+  button.btn:hover { background: var(--bg); border-color: var(--text-soft); }
+  button.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  button.btn.primary:hover { background: #16294A; }
+  button.btn.danger { color: var(--danger); border-color: #E8C5C5; }
+  button.btn.danger:hover { background: var(--danger-soft); }
+  button.btn.small { padding: 5px 10px; font-size: 12px; }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .form-row.three { grid-template-columns: repeat(3, 1fr); }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+  
+  /* Status indicators */
+  .delta-pos { color: var(--success); font-weight: 500; }
+  .delta-neg { color: var(--danger); font-weight: 500; }
+  .delta-neu { color: var(--text-muted); }
+  
+  .alert-banner {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .alert-banner.warn { background: var(--warning-soft); color: var(--warning); border-left: 3px solid var(--warning); }
+  .alert-banner.danger { background: var(--danger-soft); color: var(--danger); border-left: 3px solid var(--danger); }
+  .alert-banner.success { background: var(--success-soft); color: var(--success); border-left: 3px solid var(--success); }
+  .alert-banner.info { background: var(--accent-soft); color: var(--accent); border-left: 3px solid var(--accent); }
+  
+  /* Progress bar simple */
+  .progress {
+    height: 6px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .progress-bar.success { background: var(--success); }
+  .progress-bar.warning { background: var(--warning); }
+  .progress-bar.danger { background: var(--danger); }
+  
+  .help-text { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+  
+  @media (max-width: 700px) {
+    .pane { padding: 14px; }
+    .card { padding: 16px; }
+    .form-row, .form-row.three { grid-template-columns: 1fr; }
+    th, td { padding: 8px 6px; font-size: 12px; }
+    .stat-value { font-size: 18px; }
+    .header { padding: 12px 14px; }
+    .logo { font-size: 14px; }
+    .logo span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <h1>Winflex Costos</h1>
+    <p>Ingresá tu PIN</p>
+    <input type="password" inputmode="numeric" maxlength="4" id="pinInput" class="pin-input" placeholder="••••" autofocus>
+    <button class="btn primary" style="width:100%;" onclick="checkPin()">Ingresar</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="app">
+  <div class="header">
+    <div class="logo">Winflex Costos<span>Análisis y simulación</span></div>
+    <div class="user-pill" id="userPill">— <button onclick="logout()">salir</button></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="productos">Productos MP</button>
+    <button class="tab" data-tab="precios">Histórico precios</button>
+    <button class="tab" data-tab="simulador">Simulador</button>
+    <button class="tab" data-tab="config">Config</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div class="pane active" id="pane-dashboard">
+    <div class="grid-stats" id="dashStats"></div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Margen bruto por línea</div>
+          <div class="card-subtitle">Pre-aumentos vs post-aumentos aplicados</div>
+        </div>
+      </div>
+      <div id="dashLinesTable"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Productos MP — alertas</div>
+          <div class="card-subtitle">Productos sin actualizar precio recientemente o con variaciones grandes</div>
+        </div>
+      </div>
+      <div id="dashAlerts"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div class="pane" id="pane-productos">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Catálogo de Materia Prima</div>
+          <div class="card-subtitle">Último precio conocido de cada producto</div>
+        </div>
+        <button class="btn primary" onclick="openProductoModal()">+ Agregar producto</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="productosTable">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Proveedor</th>
+              <th class="num-col">$/kg actual</th>
+              <th class="num-col">USD/kg</th>
+              <th class="num-col">Última compra</th>
+              <th class="num-col">Kg 9m</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRECIOS -->
+  <div class="pane" id="pane-precios">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Cargar nuevo precio</div>
+          <div class="card-subtitle">Cada vez que entra una factura, registrá el precio del kg para que la app trackee la evolución</div>
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>Producto</label>
+          <select id="newPriceProducto"></select>
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="newPriceFecha">
+        </div>
+        <div class="form-group">
+          <label>$/kg</label>
+          <input type="number" step="0.01" id="newPricePesos" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>USD/kg (opcional)</label>
+          <input type="number" step="0.01" id="newPriceUSD" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Kg comprados (opcional)</label>
+          <input type="number" id="newPriceKg" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Comprobante (opcional)</label>
+          <input type="text" id="newPriceComprob" placeholder="Fc.103351">
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn primary" onclick="saveNewPrice()">Guardar precio</button>
+        <button class="btn" onclick="clearPriceForm()">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Histórico de precios</div>
+          <div class="card-subtitle">Filtrá por producto para ver evolución</div>
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns: 1fr; max-width:300px;">
+        <select id="filterProducto" onchange="renderHistorico()">
+          <option value="">Todos los productos</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto; margin-top:12px;">
+        <table id="historicoTable">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th class="num-col">$/kg</th>
+              <th class="num-col">Δ vs anterior</th>
+              <th class="num-col">USD/kg</th>
+              <th class="num-col">Kg</th>
+              <th>Comprob.</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULADOR -->
+  <div class="pane" id="pane-simulador">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Simulador de impacto</div>
+          <div class="card-subtitle">Probá distintos escenarios de aumentos de MP y ajustes de precio</div>
+        </div>
+        <button class="btn small" onclick="resetSimulador()">Reset al actual</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+        <div>
+          <h3 style="font-size:13px; font-weight:600; margin-bottom:12px;">Aumentos de MP</h3>
+          <div class="form-row full" style="gap:8px;">
+            <div class="form-group">
+              <label>PE (Alta Plástica + Simko + Simpa) %</label>
+              <input type="number" id="simPE" value="60" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>PET virgen + reciclado %</label>
+              <input type="number" id="simPET" value="12" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>AMCOR %</label>
+              <input type="number" id="simAMCOR" value="0" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>Otros Flex (tie-layers, adhesivos) %</label>
+              <input type="number" id="simOtros" value="0" oninput="runSim()">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 style="font-size:13px; font-weight:600; margin-bottom:12px;">Aumentos de precio aplicados</h3>
+          <div class="form-row full" style="gap:8px;">
+            <div class="form-group">
+              <label>PET puro %</label>
+              <input type="number" id="simAumPETpuro" value="10" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>PET/PE laminado %</label>
+              <input type="number" id="simAumPETPE" value="12" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>Flexibles puros %</label>
+              <input type="number" id="simAumFlex" value="10" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>Bandejas %</label>
+              <input type="number" id="simAumBand" value="12" oninput="runSim()">
+            </div>
+            <div class="form-group">
+              <label>Mix laminados PET/PE en línea PET (%)</label>
+              <input type="number" id="simMixLaminados" value="30" oninput="runSim()">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Resultado de la simulación</div>
+        </div>
+      </div>
+      <div id="simResult"></div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="pane" id="pane-config">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Datos base del ejercicio</div>
+          <div class="card-subtitle">Ventas anuales acumuladas (9 meses)</div>
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>Ventas PET ($)</label>
+          <input type="number" id="cfgVentasPET" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>Ventas Flexibles ($)</label>
+          <input type="number" id="cfgVentasFlex" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>Ventas Bandejas ($)</label>
+          <input type="number" id="cfgVentasBand" oninput="saveConfig()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Compras MP base (9m)</div>
+          <div class="card-subtitle">Compras anuales acumuladas por categoría — usadas para los cálculos de impacto</div>
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>PET virgen + reciclado</label>
+          <input type="number" id="cfgCompPET" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>PE proveedores (Alta+Simpa+Simko)</label>
+          <input type="number" id="cfgCompPE" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>AMCOR</label>
+          <input type="number" id="cfgCompAMCOR" oninput="saveConfig()">
+        </div>
+      </div>
+      <div class="form-row three">
+        <div class="form-group">
+          <label>Otros Flex (tie-layers, adhesivos)</label>
+          <input type="number" id="cfgCompOtrosFlex" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>Otros (MB, diluyentes)</label>
+          <input type="number" id="cfgCompOtros" oninput="saveConfig()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Asignación PE → líneas de venta</div>
+          <div class="card-subtitle">Qué % del PE comprado va a productos vendidos como cada línea</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>PE → PET (%)</label>
+          <input type="number" id="cfgPEaPET" oninput="saveConfig()">
+        </div>
+        <div class="form-group">
+          <label>PE → Flexibles (%)</label>
+          <input type="number" id="cfgPEaFlex" oninput="saveConfig()">
+        </div>
+      </div>
+      <div class="help-text">La suma debería dar 100%. Si vas a separar "PET/PE" como cuarta línea de ventas en el futuro, lo agregamos acá.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">JSONBin (sincronización opcional)</div>
+          <div class="card-subtitle">Para multi-usuario. Si lo dejás vacío, los datos se guardan solo en este dispositivo.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bin ID</label>
+          <input type="text" id="cfgBinId" placeholder="ej: 69c18ce8b7ec241ddc96cd8a">
+        </div>
+        <div class="form-group">
+          <label>Master Key</label>
+          <input type="password" id="cfgMasterKey" placeholder="$2a$10$...">
+        </div>
+      </div>
+      <div style="margin-top:12px; display:flex; gap:8px;">
+        <button class="btn" onclick="saveJsonBinConfig()">Guardar config</button>
+        <button class="btn" onclick="syncFromCloud()">Bajar de cloud</button>
+        <button class="btn primary" onclick="syncToCloud()">Subir a cloud</button>
+        <span id="syncStatus" style="align-self:center; font-size:12px; color:var(--text-muted);"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Datos</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn" onclick="exportData()">Exportar JSON</button>
+        <button class="btn" onclick="document.getElementById('importFile').click()">Importar JSON</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        <button class="btn danger" onclick="resetData()">Resetear datos</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Producto -->
+<div class="modal-bg" id="productoModal">
+  <div class="modal">
+    <h2 id="prodModalTitle">Nuevo producto</h2>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>Nombre</label>
+      <input type="text" id="prodNombre" placeholder="ej: PEBDC TN 7006">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoría</label>
+        <select id="prodCategoria">
+          <option value="PE">PE</option>
+          <option value="PET virgen">PET virgen</option>
+          <option value="PET reciclado">PET reciclado</option>
+          <option value="AMCOR">AMCOR</option>
+          <option value="Tie-layer">Tie-layer</option>
+          <option value="Adhesivo">Adhesivo</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Proveedor</label>
+        <input type="text" id="prodProveedor" placeholder="ej: Alta Plastica">
+      </div>
+    </div>
+    <div class="form-row three">
+      <div class="form-group">
+        <label>Último $/kg</label>
+        <input type="number" step="0.01" id="prodPesos">
+      </div>
+      <div class="form-group">
+        <label>Último USD/kg</label>
+        <input type="number" step="0.01" id="prodUSD">
+      </div>
+      <div class="form-group">
+        <label>Última fecha</label>
+        <input type="date" id="prodFecha">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Kg consumidos / 9m (opcional)</label>
+      <input type="number" id="prodKg9m" placeholder="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeProductoModal()">Cancelar</button>
+      <button class="btn danger" id="prodDeleteBtn" style="display:none" onclick="deleteProducto()">Eliminar</button>
+      <button class="btn primary" onclick="saveProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== ESTADO ==========
+const PINS = { '1540': 'Matías', '3080': 'Jonathan', '0104': 'Mirta', '2571': 'Agustín' };
+const STORAGE_KEY = 'winflex-costos-v1';
+
+let state = {
+  productos: [],
+  precios: [],
+  config: {
+    ventas: { PET: 1037664053, Flex: 875721961, Band: 866817429 },
+    compras: { PET: 645119703, PE: 163358325, AMCOR: 193933062, OtrosFlex: 103365716, Otros: 48360298 },
+    asignacion: { peAPet: 60, peAFlex: 40 },
+    jsonbin: { binId: '', masterKey: '' }
+  }
+};
+
+let currentUser = null;
+let editingProducto = null;
+
+// Productos pre-cargados
+const PRODUCTOS_INICIALES = [
+  { id: 'p1', nombre: 'Preforma Cristal Zarandeada', categoria: 'PET reciclado', proveedor: 'Reciclar', precioPesos: 1405, precioUSD: 0, fechaUlt: '2026-03-30', kg9m: 282371 },
+  { id: 'p2', nombre: 'PET B90A', categoria: 'PET virgen', proveedor: 'Alpek', precioPesos: 1465, precioUSD: 1.05, fechaUlt: '2026-03-03', kg9m: 55000 },
+  { id: 'p3', nombre: 'PET FINOS', categoria: 'PET virgen', proveedor: 'Alpek', precioPesos: 1420, precioUSD: 1.05, fechaUlt: '2025-08-26', kg9m: 36105 },
+  { id: 'p4', nombre: 'Preforma Cristal Molida', categoria: 'PET reciclado', proveedor: 'Ecopek', precioPesos: 1413, precioUSD: 0, fechaUlt: '2025-12-10', kg9m: 35742 },
+  { id: 'p5', nombre: 'PET AF626', categoria: 'PET virgen', proveedor: 'Alpek', precioPesos: 1580, precioUSD: 1.10, fechaUlt: '2025-10-30', kg9m: 25000 },
+  { id: 'p6', nombre: 'PET B90A T01', categoria: 'PET virgen', proveedor: 'Alpek', precioPesos: 1616, precioUSD: 1.10, fechaUlt: '2025-09-17', kg9m: 22500 },
+  { id: 'p7', nombre: 'PEBDC TN 7006', categoria: 'PE', proveedor: 'Alta Plastica', precioPesos: 3480, precioUSD: 2.48, fechaUlt: '2026-03-30', kg9m: 15125 },
+  { id: 'p8', nombre: 'PEBDC TS 7006', categoria: 'PE', proveedor: 'Alta Plastica', precioPesos: 2010, precioUSD: 1.42, fechaUlt: '2026-03-03', kg9m: 9625 },
+  { id: 'p9', nombre: 'CO PE LDPE 206M BG6025', categoria: 'PE', proveedor: 'Grupo Simpa', precioPesos: 1961, precioUSD: 0, fechaUlt: '2026-03-06', kg9m: 9000 },
+  { id: 'p10', nombre: 'CO PE LDPE 207M BG6025', categoria: 'PE', proveedor: 'Grupo Simpa', precioPesos: 1961, precioUSD: 0, fechaUlt: '2026-03-06', kg9m: 7500 },
+  { id: 'p11', nombre: 'CO PE DOWLEX NG2045', categoria: 'PE', proveedor: 'Grupo Simpa', precioPesos: 2029, precioUSD: 0, fechaUlt: '2025-10-07', kg9m: 1500 },
+  { id: 'p12', nombre: 'PEADC GF-4950', categoria: 'PE', proveedor: 'Alta Plastica', precioPesos: 1883, precioUSD: 1.35, fechaUlt: '2026-02-23', kg9m: 1000 },
+  { id: 'p13', nombre: 'AMCOR (laminado)', categoria: 'AMCOR', proveedor: 'AMCOR', precioPesos: 0, precioUSD: 0, fechaUlt: '2026-03-30', kg9m: 0 },
+  { id: 'p14', nombre: 'Surlyn 1601', categoria: 'Tie-layer', proveedor: 'JPC', precioPesos: 0, precioUSD: 9.12, fechaUlt: '2026-03-12', kg9m: 6500 },
+  { id: 'p15', nombre: 'Bynel 46E 1052', categoria: 'Tie-layer', proveedor: 'JPC', precioPesos: 0, precioUSD: 7.50, fechaUlt: '2026-03-12', kg9m: 1250 },
+];
+
+// ========== HELPERS ==========
+const fmtMoney = n => '$ ' + (Math.round(n||0)).toLocaleString('es-AR');
+const fmtKg = n => (Math.round(n||0)).toLocaleString('es-AR') + ' kg';
+const fmtPct = (n, d=1) => (n||0).toFixed(d) + '%';
+const fmtPesos = n => (Math.round(n||0)).toLocaleString('es-AR');
+const fmtDate = s => s ? new Date(s+'T00:00:00').toLocaleDateString('es-AR', {day:'2-digit', month:'short', year:'2-digit'}) : '—';
+const daysSince = s => s ? Math.floor((new Date() - new Date(s+'T00:00:00'))/(1000*60*60*24)) : 999;
+
+// ========== AUTH ==========
+function checkPin() {
+  const pin = document.getElementById('pinInput').value;
+  if (PINS[pin]) {
+    currentUser = PINS[pin];
+    sessionStorage.setItem('wfc-user', currentUser);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('userPill').firstChild.textContent = currentUser + ' ';
+    init();
+  } else {
+    document.getElementById('loginError').textContent = 'PIN incorrecto';
+    document.getElementById('pinInput').value = '';
+  }
+}
+function logout() {
+  sessionStorage.removeItem('wfc-user');
+  location.reload();
+}
+document.getElementById('pinInput').addEventListener('keypress', e => { if (e.key === 'Enter') checkPin(); });
+
+// ========== PERSISTENCE ==========
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function load() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      state = { ...state, ...parsed };
+      if (!state.productos || state.productos.length === 0) state.productos = [...PRODUCTOS_INICIALES];
+      if (!state.precios) state.precios = [];
+      if (!state.config) state.config = {
+        ventas: { PET: 1037664053, Flex: 875721961, Band: 866817429 },
+        compras: { PET: 645119703, PE: 163358325, AMCOR: 193933062, OtrosFlex: 103365716, Otros: 48360298 },
+        asignacion: { peAPet: 60, peAFlex: 40 },
+        jsonbin: { binId: '', masterKey: '' }
+      };
+    } catch (e) { console.error(e); }
+  } else {
+    state.productos = [...PRODUCTOS_INICIALES];
+    save();
+  }
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'winflex-costos-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+function importData(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      state = JSON.parse(e.target.result);
+      save(); init();
+      alert('Datos importados');
+    } catch (err) { alert('Error: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+function resetData() {
+  if (confirm('¿Resetear TODOS los datos a los iniciales? Esto no se puede deshacer.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+// ========== JSONBin sync ==========
+function saveJsonBinConfig() {
+  state.config.jsonbin = {
+    binId: document.getElementById('cfgBinId').value.trim(),
+    masterKey: document.getElementById('cfgMasterKey').value.trim()
+  };
+  save();
+  setSyncStatus('Config guardada', 'success');
+}
+async function syncToCloud() {
+  const { binId, masterKey } = state.config.jsonbin;
+  if (!binId || !masterKey) { setSyncStatus('Falta config', 'danger'); return; }
+  setSyncStatus('Subiendo...', '');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': masterKey },
+      body: JSON.stringify(state)
+    });
+    if (r.ok) setSyncStatus('Subido OK ' + new Date().toLocaleTimeString('es-AR'), 'success');
+    else setSyncStatus('Error: ' + r.status, 'danger');
+  } catch (e) { setSyncStatus('Error: ' + e.message, 'danger'); }
+}
+async function syncFromCloud() {
+  const { binId, masterKey } = state.config.jsonbin;
+  if (!binId || !masterKey) { setSyncStatus('Falta config', 'danger'); return; }
+  if (!confirm('Esto va a sobreescribir tus datos locales con los del cloud. ¿Continuar?')) return;
+  setSyncStatus('Bajando...', '');
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+      headers: { 'X-Master-Key': masterKey }
+    });
+    if (r.ok) {
+      const data = await r.json();
+      state = data.record;
+      save(); init();
+      setSyncStatus('Bajado OK', 'success');
+    } else setSyncStatus('Error: ' + r.status, 'danger');
+  } catch (e) { setSyncStatus('Error: ' + e.message, 'danger'); }
+}
+function setSyncStatus(msg, type) {
+  const el = document.getElementById('syncStatus');
+  el.textContent = msg;
+  el.style.color = type === 'success' ? 'var(--success)' : type === 'danger' ? 'var(--danger)' : 'var(--text-muted)';
+}
+
+// ========== TABS ==========
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-' + t.dataset.tab).classList.add('active');
+    if (t.dataset.tab === 'simulador') runSim();
+    if (t.dataset.tab === 'dashboard') renderDashboard();
+  });
+});
+
+// ========== ENGINE: cálculos de costos y márgenes ==========
+function calcular(escenario = {}) {
+  const cfg = state.config;
+  const v = cfg.ventas;
+  const c = cfg.compras;
+  const a = cfg.asignacion;
+
+  // Aumentos MP
+  const aumPE = (escenario.aumPE ?? 0) / 100;
+  const aumPET = (escenario.aumPET ?? 0) / 100;
+  const aumAMCOR = (escenario.aumAMCOR ?? 0) / 100;
+  const aumOtrosFlex = (escenario.aumOtros ?? 0) / 100;
+
+  // Aumentos de precio
+  const auPETpuro = (escenario.auPETpuro ?? 0) / 100;
+  const auPETPE = (escenario.auPETPE ?? 0) / 100;
+  const auFlex = (escenario.auFlex ?? 0) / 100;
+  const auBand = (escenario.auBand ?? 0) / 100;
+  const mixLam = (escenario.mixLam ?? 30) / 100;
+
+  const peAPet = a.peAPet / 100;
+  const peAFlex = a.peAFlex / 100;
+  const vPETBand = v.PET + v.Band;
+
+  // MP base por línea (sin aumentos)
+  const mp_base = {
+    PET: c.PET * (v.PET / vPETBand) + c.PE * peAPet,
+    Flex: c.PE * peAFlex + c.OtrosFlex + c.AMCOR,
+    Band: c.PET * (v.Band / vPETBand)
+  };
+
+  // Sobrecostos por aumentos de MP
+  const sc_pe = c.PE * aumPE;
+  const sc_pet = c.PET * aumPET;
+  const sc_amcor = c.AMCOR * aumAMCOR;
+  const sc_otros = c.OtrosFlex * aumOtrosFlex;
+
+  const sobrecostos = {
+    PET: sc_pe * peAPet + sc_pet * (v.PET / vPETBand),
+    Flex: sc_pe * peAFlex + sc_amcor + sc_otros,
+    Band: sc_pet * (v.Band / vPETBand)
+  };
+
+  // Aumento promedio PET (mix laminados / puro)
+  const aumPromPET = mixLam * auPETPE + (1 - mixLam) * auPETpuro;
+
+  const aumentos_precio = {
+    PET: aumPromPET,
+    Flex: auFlex,
+    Band: auBand
+  };
+
+  // Resultados
+  const resultado = {};
+  ['PET', 'Flex', 'Band'].forEach(linea => {
+    const ventas_pre = v[linea];
+    const ventas_post = ventas_pre * (1 + aumentos_precio[linea]);
+    const mp_pre = mp_base[linea];
+    const mp_post = mp_pre + sobrecostos[linea];
+    const mb_pre_pesos = ventas_pre - mp_pre;
+    const mb_post_pesos = ventas_post - mp_post;
+    const mb_pre_pct = (ventas_pre - mp_pre) / ventas_pre * 100;
+    const mb_post_pct = (ventas_post - mp_post) / ventas_post * 100;
+    const delta_ingresos = ventas_post - ventas_pre;
+    const delta_resultado = delta_ingresos - sobrecostos[linea];
+    
+    resultado[linea] = {
+      ventas_pre, ventas_post, mp_pre, mp_post,
+      mb_pre_pesos, mb_post_pesos, mb_pre_pct, mb_post_pct,
+      delta_ingresos, sobrecosto: sobrecostos[linea], delta_resultado,
+      aumento_aplicado: aumentos_precio[linea]
+    };
+  });
+
+  return resultado;
+}
+
+// ========== DASHBOARD ==========
+function renderDashboard() {
+  // Calcular escenario actual
+  const escActual = {
+    aumPE: 60, aumPET: 12, aumAMCOR: 0, aumOtros: 0,
+    auPETpuro: 10, auPETPE: 12, auFlex: 10, auBand: 12,
+    mixLam: 30
+  };
+  const r = calcular(escActual);
+
+  const totalDelta = r.PET.delta_resultado + r.Flex.delta_resultado + r.Band.delta_resultado;
+  const totalIngExtra = r.PET.delta_ingresos + r.Flex.delta_ingresos + r.Band.delta_ingresos;
+  const totalSobrecosto = r.PET.sobrecosto + r.Flex.sobrecosto + r.Band.sobrecosto;
+
+  const productos = state.productos.length;
+  const productosAlerta = state.productos.filter(p => daysSince(p.fechaUlt) > 60).length;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat ${totalDelta > 0 ? 'success' : 'danger'}">
+      <div class="stat-label">Resultado neto anual</div>
+      <div class="stat-value">${fmtMoney(totalDelta)}</div>
+      <div class="stat-meta">Ingresos extra − sobrecostos</div>
+    </div>
+    <div class="stat accent">
+      <div class="stat-label">Δ Ingresos por aumentos</div>
+      <div class="stat-value">${fmtMoney(totalIngExtra)}</div>
+      <div class="stat-meta">${fmtPct(totalIngExtra / (state.config.ventas.PET + state.config.ventas.Flex + state.config.ventas.Band) * 100)} sobre ventas</div>
+    </div>
+    <div class="stat warning">
+      <div class="stat-label">Sobrecostos</div>
+      <div class="stat-value">${fmtMoney(totalSobrecosto)}</div>
+      <div class="stat-meta">Por aumentos de MP confirmados</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Productos cargados</div>
+      <div class="stat-value">${productos}</div>
+      <div class="stat-meta">${productosAlerta} sin actualizar (60+ días)</div>
+    </div>
+  `;
+
+  // Tabla de líneas
+  let html = '<div style="overflow-x:auto;"><table><thead><tr>';
+  html += '<th>Línea</th><th class="num-col">Ventas pre</th><th class="num-col">Δ Ingresos</th><th class="num-col">Sobrecosto</th><th class="num-col">Resultado</th><th class="num-col">MB% pre</th><th class="num-col">MB% post</th><th class="num-col">Δ MB</th>';
+  html += '</tr></thead><tbody>';
+  ['PET', 'Flex', 'Band'].forEach(k => {
+    const d = r[k];
+    const lineName = k === 'Flex' ? 'Flexibles' : (k === 'Band' ? 'Bandejas' : 'PET');
+    const deltaMB = d.mb_post_pct - d.mb_pre_pct;
+    html += `<tr>
+      <td><strong>${lineName}</strong></td>
+      <td class="num-col">${fmtMoney(d.ventas_pre)}</td>
+      <td class="num-col delta-pos">+${fmtMoney(d.delta_ingresos)}</td>
+      <td class="num-col delta-neg">−${fmtMoney(d.sobrecosto)}</td>
+      <td class="num-col ${d.delta_resultado >= 0 ? 'delta-pos' : 'delta-neg'}">${d.delta_resultado >= 0 ? '+' : ''}${fmtMoney(d.delta_resultado)}</td>
+      <td class="num-col">${fmtPct(d.mb_pre_pct)}</td>
+      <td class="num-col">${fmtPct(d.mb_post_pct)}</td>
+      <td class="num-col ${deltaMB >= 0 ? 'delta-pos' : 'delta-neg'}">${deltaMB >= 0 ? '+' : ''}${deltaMB.toFixed(1)}pp</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('dashLinesTable').innerHTML = html;
+
+  // Alertas
+  const alertas = state.productos
+    .filter(p => daysSince(p.fechaUlt) > 60 || (p.precioPesos > 0 && p.categoria === 'PE'))
+    .map(p => {
+      const dias = daysSince(p.fechaUlt);
+      let estado = '', tipo = '';
+      if (dias > 90) { estado = 'Sin actualizar 90+ días'; tipo = 'danger'; }
+      else if (dias > 60) { estado = `Sin actualizar ${dias} días`; tipo = 'warning'; }
+      else if (p.categoria === 'PE' && p.proveedor === 'Alta Plastica' && p.precioPesos < 3000) {
+        estado = 'Posible aumento pendiente'; tipo = 'warning';
+      } else return null;
+      return { p, estado, tipo, dias };
+    })
+    .filter(x => x);
+
+  if (alertas.length === 0) {
+    document.getElementById('dashAlerts').innerHTML = '<p style="color:var(--text-muted); padding:8px 0;">Sin alertas. Todos los precios están razonablemente actualizados.</p>';
+  } else {
+    let aHtml = '<div style="overflow-x:auto;"><table><thead><tr><th>Producto</th><th>Proveedor</th><th class="num-col">$/kg</th><th class="num-col">Última fecha</th><th>Estado</th></tr></thead><tbody>';
+    alertas.forEach(({p, estado, tipo}) => {
+      aHtml += `<tr>
+        <td>${p.nombre}</td>
+        <td>${p.proveedor}</td>
+        <td class="num-col">$ ${fmtPesos(p.precioPesos)}</td>
+        <td class="num-col">${fmtDate(p.fechaUlt)}</td>
+        <td><span class="pill pill-${tipo}">${estado}</span></td>
+      </tr>`;
+    });
+    aHtml += '</tbody></table></div>';
+    document.getElementById('dashAlerts').innerHTML = aHtml;
+  }
+}
+
+// ========== PRODUCTOS ==========
+function renderProductos() {
+  const tbody = document.querySelector('#productosTable tbody');
+  tbody.innerHTML = state.productos.map(p => {
+    const dias = daysSince(p.fechaUlt);
+    let badge = '';
+    if (dias > 90) badge = `<span class="pill pill-danger">${dias}d</span>`;
+    else if (dias > 60) badge = `<span class="pill pill-warning">${dias}d</span>`;
+    
+    const catClass = p.categoria === 'PE' ? 'pill-pe' :
+                     p.categoria.includes('PET') ? 'pill-pet' :
+                     p.categoria === 'AMCOR' ? 'pill-amcor' : 'pill-other';
+    return `<tr>
+      <td><strong>${p.nombre}</strong></td>
+      <td><span class="pill ${catClass}">${p.categoria}</span></td>
+      <td>${p.proveedor}</td>
+      <td class="num-col">$ ${fmtPesos(p.precioPesos)}</td>
+      <td class="num-col">${p.precioUSD ? 'USD ' + p.precioUSD.toFixed(2) : '—'}</td>
+      <td class="num-col">${fmtDate(p.fechaUlt)} ${badge}</td>
+      <td class="num-col">${p.kg9m ? fmtKg(p.kg9m) : '—'}</td>
+      <td><button class="btn small" onclick="openProductoModal('${p.id}')">Editar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openProductoModal(id) {
+  if (id) {
+    const p = state.productos.find(x => x.id === id);
+    if (!p) return;
+    editingProducto = id;
+    document.getElementById('prodModalTitle').textContent = 'Editar producto';
+    document.getElementById('prodNombre').value = p.nombre;
+    document.getElementById('prodCategoria').value = p.categoria;
+    document.getElementById('prodProveedor').value = p.proveedor;
+    document.getElementById('prodPesos').value = p.precioPesos || '';
+    document.getElementById('prodUSD').value = p.precioUSD || '';
+    document.getElementById('prodFecha').value = p.fechaUlt || '';
+    document.getElementById('prodKg9m').value = p.kg9m || '';
+    document.getElementById('prodDeleteBtn').style.display = 'inline-block';
+  } else {
+    editingProducto = null;
+    document.getElementById('prodModalTitle').textContent = 'Nuevo producto';
+    ['prodNombre','prodProveedor','prodPesos','prodUSD','prodKg9m'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('prodFecha').value = new Date().toISOString().slice(0,10);
+    document.getElementById('prodCategoria').value = 'PE';
+    document.getElementById('prodDeleteBtn').style.display = 'none';
+  }
+  document.getElementById('productoModal').classList.add('open');
+}
+function closeProductoModal() {
+  document.getElementById('productoModal').classList.remove('open');
+  editingProducto = null;
+}
+function saveProducto() {
+  const obj = {
+    nombre: document.getElementById('prodNombre').value.trim(),
+    categoria: document.getElementById('prodCategoria').value,
+    proveedor: document.getElementById('prodProveedor').value.trim(),
+    precioPesos: parseFloat(document.getElementById('prodPesos').value) || 0,
+    precioUSD: parseFloat(document.getElementById('prodUSD').value) || 0,
+    fechaUlt: document.getElementById('prodFecha').value,
+    kg9m: parseFloat(document.getElementById('prodKg9m').value) || 0
+  };
+  if (!obj.nombre) { alert('Falta el nombre'); return; }
+  
+  if (editingProducto) {
+    const p = state.productos.find(x => x.id === editingProducto);
+    Object.assign(p, obj);
+  } else {
+    obj.id = 'p' + Date.now();
+    state.productos.push(obj);
+  }
+  save();
+  renderProductos();
+  populatePriceSelectors();
+  closeProductoModal();
+}
+function deleteProducto() {
+  if (!editingProducto) return;
+  if (!confirm('¿Eliminar este producto? También se eliminan sus precios históricos.')) return;
+  state.productos = state.productos.filter(p => p.id !== editingProducto);
+  state.precios = state.precios.filter(p => p.productoId !== editingProducto);
+  save(); renderProductos(); populatePriceSelectors(); closeProductoModal();
+}
+
+// ========== PRECIOS / HISTÓRICO ==========
+function populatePriceSelectors() {
+  const opts = state.productos.map(p => `<option value="${p.id}">${p.nombre} (${p.proveedor})</option>`).join('');
+  document.getElementById('newPriceProducto').innerHTML = opts;
+  document.getElementById('filterProducto').innerHTML = '<option value="">Todos los productos</option>' + opts;
+}
+
+function saveNewPrice() {
+  const productoId = document.getElementById('newPriceProducto').value;
+  const fecha = document.getElementById('newPriceFecha').value;
+  const pesos = parseFloat(document.getElementById('newPricePesos').value) || 0;
+  const usd = parseFloat(document.getElementById('newPriceUSD').value) || 0;
+  const kg = parseFloat(document.getElementById('newPriceKg').value) || 0;
+  const comprob = document.getElementById('newPriceComprob').value.trim();
+
+  if (!productoId || !fecha || !pesos) { alert('Falta producto, fecha o $/kg'); return; }
+
+  state.precios.push({
+    id: 'pr' + Date.now(),
+    productoId, fecha, pesos, usd, kg, comprob
+  });
+
+  // Actualizar el producto con el último precio
+  const p = state.productos.find(x => x.id === productoId);
+  if (p && new Date(fecha) >= new Date(p.fechaUlt || '1900-01-01')) {
+    p.precioPesos = pesos;
+    if (usd) p.precioUSD = usd;
+    p.fechaUlt = fecha;
+    if (kg) p.kg9m = (p.kg9m || 0) + kg;
+  }
+
+  save();
+  renderHistorico();
+  renderProductos();
+  clearPriceForm();
+  alert('Precio guardado');
+}
+function clearPriceForm() {
+  ['newPricePesos','newPriceUSD','newPriceKg','newPriceComprob'].forEach(i => document.getElementById(i).value = '');
+}
+
+function renderHistorico() {
+  const filter = document.getElementById('filterProducto').value;
+  let precios = [...state.precios].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  if (filter) precios = precios.filter(p => p.productoId === filter);
+
+  const tbody = document.querySelector('#historicoTable tbody');
+  if (precios.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:20px;">No hay precios cargados aún</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = precios.map((pr, i) => {
+    const p = state.productos.find(x => x.id === pr.productoId);
+    const nombreProducto = p ? p.nombre : '—';
+    
+    // Calcular delta vs registro anterior del mismo producto
+    const anteriores = state.precios
+      .filter(x => x.productoId === pr.productoId && new Date(x.fecha) < new Date(pr.fecha))
+      .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+    let deltaTxt = '—', deltaCls = 'delta-neu';
+    if (anteriores.length > 0) {
+      const ant = anteriores[0];
+      const delta = (pr.pesos - ant.pesos) / ant.pesos * 100;
+      deltaTxt = (delta >= 0 ? '+' : '') + delta.toFixed(1) + '%';
+      deltaCls = delta > 5 ? 'delta-neg' : (delta < -5 ? 'delta-pos' : 'delta-neu');
+    }
+
+    return `<tr>
+      <td>${fmtDate(pr.fecha)}</td>
+      <td>${nombreProducto}</td>
+      <td class="num-col">$ ${fmtPesos(pr.pesos)}</td>
+      <td class="num-col ${deltaCls}">${deltaTxt}</td>
+      <td class="num-col">${pr.usd ? 'USD ' + pr.usd.toFixed(2) : '—'}</td>
+      <td class="num-col">${pr.kg ? fmtKg(pr.kg) : '—'}</td>
+      <td>${pr.comprob || '—'}</td>
+      <td><button class="btn small danger" onclick="deletePrice('${pr.id}')">×</button></td>
+    </tr>`;
+  }).join('');
+}
+function deletePrice(id) {
+  if (!confirm('¿Eliminar este registro?')) return;
+  state.precios = state.precios.filter(p => p.id !== id);
+  save(); renderHistorico();
+}
+
+// ========== SIMULADOR ==========
+function runSim() {
+  const escenario = {
+    aumPE: parseFloat(document.getElementById('simPE').value) || 0,
+    aumPET: parseFloat(document.getElementById('simPET').value) || 0,
+    aumAMCOR: parseFloat(document.getElementById('simAMCOR').value) || 0,
+    aumOtros: parseFloat(document.getElementById('simOtros').value) || 0,
+    auPETpuro: parseFloat(document.getElementById('simAumPETpuro').value) || 0,
+    auPETPE: parseFloat(document.getElementById('simAumPETPE').value) || 0,
+    auFlex: parseFloat(document.getElementById('simAumFlex').value) || 0,
+    auBand: parseFloat(document.getElementById('simAumBand').value) || 0,
+    mixLam: parseFloat(document.getElementById('simMixLaminados').value) || 30
+  };
+  const r = calcular(escenario);
+  const totalDelta = r.PET.delta_resultado + r.Flex.delta_resultado + r.Band.delta_resultado;
+  const totalIngExtra = r.PET.delta_ingresos + r.Flex.delta_ingresos + r.Band.delta_ingresos;
+  const totalSobrecosto = r.PET.sobrecosto + r.Flex.sobrecosto + r.Band.sobrecosto;
+
+  const banner = totalDelta >= 0 
+    ? `<div class="alert-banner success">Bajo este escenario, generás <strong>${fmtMoney(totalDelta)}</strong> de margen extra anualizado. Cubrís bien los aumentos de MP.</div>`
+    : `<div class="alert-banner danger">Bajo este escenario, perdés <strong>${fmtMoney(-totalDelta)}</strong> de margen anualizado. Necesitás trasladar más aumento a precio.</div>`;
+
+  let html = banner;
+  html += `<div class="grid-stats">
+    <div class="stat ${totalDelta >= 0 ? 'success' : 'danger'}">
+      <div class="stat-label">Resultado neto</div>
+      <div class="stat-value">${fmtMoney(totalDelta)}</div>
+    </div>
+    <div class="stat accent">
+      <div class="stat-label">Δ Ingresos extra</div>
+      <div class="stat-value">${fmtMoney(totalIngExtra)}</div>
+    </div>
+    <div class="stat warning">
+      <div class="stat-label">Sobrecostos MP</div>
+      <div class="stat-value">${fmtMoney(totalSobrecosto)}</div>
+    </div>
+  </div>`;
+
+  html += '<div style="overflow-x:auto;"><table><thead><tr>';
+  html += '<th>Línea</th><th class="num-col">Aumento</th><th class="num-col">Δ Ingresos</th><th class="num-col">Sobrecosto</th><th class="num-col">Resultado</th><th class="num-col">MB% pre</th><th class="num-col">MB% post</th><th class="num-col">Aum nec.</th>';
+  html += '</tr></thead><tbody>';
+  ['PET','Flex','Band'].forEach(k => {
+    const d = r[k];
+    const linea = k === 'Flex' ? 'Flexibles' : (k === 'Band' ? 'Bandejas' : 'PET');
+    const aumNec = d.sobrecosto / d.ventas_pre * 100;
+    const status = d.delta_resultado >= 0 ? 'pill-success' : 'pill-danger';
+    html += `<tr>
+      <td><strong>${linea}</strong></td>
+      <td class="num-col">${fmtPct(d.aumento_aplicado * 100)}</td>
+      <td class="num-col delta-pos">+${fmtMoney(d.delta_ingresos)}</td>
+      <td class="num-col delta-neg">−${fmtMoney(d.sobrecosto)}</td>
+      <td class="num-col ${d.delta_resultado >= 0 ? 'delta-pos' : 'delta-neg'}">${d.delta_resultado >= 0 ? '+' : ''}${fmtMoney(d.delta_resultado)}</td>
+      <td class="num-col">${fmtPct(d.mb_pre_pct)}</td>
+      <td class="num-col">${fmtPct(d.mb_post_pct)}</td>
+      <td class="num-col"><span class="pill ${aumNec <= d.aumento_aplicado*100 ? 'pill-success' : 'pill-warning'}">${fmtPct(aumNec)}</span></td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  html += '<div class="help-text">"Aum nec" = aumento mínimo necesario en cada línea para cubrir el sobrecosto. Si está en verde, tu aumento aplicado lo cubre.</div>';
+
+  document.getElementById('simResult').innerHTML = html;
+}
+function resetSimulador() {
+  document.getElementById('simPE').value = 60;
+  document.getElementById('simPET').value = 12;
+  document.getElementById('simAMCOR').value = 0;
+  document.getElementById('simOtros').value = 0;
+  document.getElementById('simAumPETpuro').value = 10;
+  document.getElementById('simAumPETPE').value = 12;
+  document.getElementById('simAumFlex').value = 10;
+  document.getElementById('simAumBand').value = 12;
+  document.getElementById('simMixLaminados').value = 30;
+  runSim();
+}
+
+// ========== CONFIG ==========
+function loadConfig() {
+  const c = state.config;
+  document.getElementById('cfgVentasPET').value = c.ventas.PET;
+  document.getElementById('cfgVentasFlex').value = c.ventas.Flex;
+  document.getElementById('cfgVentasBand').value = c.ventas.Band;
+  document.getElementById('cfgCompPET').value = c.compras.PET;
+  document.getElementById('cfgCompPE').value = c.compras.PE;
+  document.getElementById('cfgCompAMCOR').value = c.compras.AMCOR;
+  document.getElementById('cfgCompOtrosFlex').value = c.compras.OtrosFlex;
+  document.getElementById('cfgCompOtros').value = c.compras.Otros;
+  document.getElementById('cfgPEaPET').value = c.asignacion.peAPet;
+  document.getElementById('cfgPEaFlex').value = c.asignacion.peAFlex;
+  document.getElementById('cfgBinId').value = c.jsonbin.binId || '';
+  document.getElementById('cfgMasterKey').value = c.jsonbin.masterKey || '';
+}
+function saveConfig() {
+  state.config.ventas.PET = parseFloat(document.getElementById('cfgVentasPET').value) || 0;
+  state.config.ventas.Flex = parseFloat(document.getElementById('cfgVentasFlex').value) || 0;
+  state.config.ventas.Band = parseFloat(document.getElementById('cfgVentasBand').value) || 0;
+  state.config.compras.PET = parseFloat(document.getElementById('cfgCompPET').value) || 0;
+  state.config.compras.PE = parseFloat(document.getElementById('cfgCompPE').value) || 0;
+  state.config.compras.AMCOR = parseFloat(document.getElementById('cfgCompAMCOR').value) || 0;
+  state.config.compras.OtrosFlex = parseFloat(document.getElementById('cfgCompOtrosFlex').value) || 0;
+  state.config.compras.Otros = parseFloat(document.getElementById('cfgCompOtros').value) || 0;
+  state.config.asignacion.peAPet = parseFloat(document.getElementById('cfgPEaPET').value) || 60;
+  state.config.asignacion.peAFlex = parseFloat(document.getElementById('cfgPEaFlex').value) || 40;
+  save();
+}
+
+// ========== INIT ==========
+function init() {
+  load();
+  loadConfig();
+  populatePriceSelectors();
+  renderProductos();
+  renderHistorico();
+  renderDashboard();
+  document.getElementById('newPriceFecha').value = new Date().toISOString().slice(0,10);
+}
+
+// Auto-login si hay sesión
+window.addEventListener('load', () => {
+  const u = sessionStorage.getItem('wfc-user');
+  if (u && Object.values(PINS).includes(u)) {
+    currentUser = u;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('active');
+    document.getElementById('userPill').firstChild.textContent = u + ' ';
+    init();
+  }
+});
+
+// Click fuera del modal lo cierra
+document.getElementById('productoModal').addEventListener('click', e => {
+  if (e.target.id === 'productoModal') closeProductoModal();
+});
+</script>
+
+</body>
+</html>
